@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Game Center</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+  <div class="main-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Events</h2>
+      </div>
+      <nav class="nav-menu">
+        <a href="#songs" class="nav-item active">Songs</a>
+        <a href="#dlc" class="nav-item">DLC</a>
+        <a href="#gamecenters" class="nav-item">Game Centers</a>
+      </nav>
+      <div id="eventsList" class="events-list"></div>
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn btn-secondary btn-full">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="header">
+        <h1>Game Center Management</h1>
+        <div class="header-actions">
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Search songs..."
+            class="search-input"
+          >
+        </div>
+      </header>
+
+      <section id="songsSection" class="content-section active">
+        <h2>Songs</h2>
+        <div id="songsList" class="songs-grid"></div>
+        <div id="songsPagination" class="pagination"></div>
+      </section>
+
+      <section id="dlcSection" class="content-section">
+        <h2>DLC Content</h2>
+        <div id="dlcList" class="dlc-grid"></div>
+      </section>
+
+      <section id="gamecentersSection" class="content-section">
+        <h2>Game Centers Near You</h2>
+        <div id="gamecentersList" class="gamecenters-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="main.js"></script>
+  <script>
+    const API_URL = '/api';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      await loadEvents();
+      await loadSongs();
+
+      setupEventListeners();
+    });
+
+    async function loadEvents() {
+      try {
+        const response = await fetch(`${API_URL}/events`);
+        const data = await response.json();
+
+        if (data.success) {
+          const eventsList = document.getElementById('eventsList');
+          eventsList.innerHTML = data.data.map(event => `
+            <div class="event-card">
+              <h3>${event.event_title}</h3>
+              <p>${event.event_detail}</p>
+              <small>${event.event_start_date} to ${event.event_end_date}</small>
+            </div>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('Error loading events:', error);
+      }
+    }
+
+    async function loadSongs(page = 1) {
+      try {
+        const response = await fetch(`${API_URL}/songs?page=${page}&limit=9`);
+        const data = await response.json();
+
+        if (data.success) {
+          const songsList = document.getElementById('songsList');
+          songsList.innerHTML = data.data.map(song => `
+            <div class="song-card">
+              <img src="${song.song_jacket_url || '/placeholder.jpg'}" alt="${song.song_name}">
+              <h3>${song.song_name}</h3>
+              <p class="artist">${song.artist_name}</p>
+              <div class="song-meta">
+                <span class="difficulty ${song.pattern_difficulty.toLowerCase()}">${song.pattern_difficulty}</span>
+                <span class="level">Lv.${song.pattern_lv}</span>
+              </div>
+              <div class="song-stats">
+                <p>Best Score: ${song.players_best_score}</p>
+                <p>Clear: ${song.clear_type}</p>
+              </div>
+              ${song.dlc_required_name ? `<div class="dlc-badge">${song.dlc_required_name}</div>` : ''}
+            </div>
+          `).join('');
+
+          renderPagination(data.pagination);
+        }
+      } catch (error) {
+        console.error('Error loading songs:', error);
+      }
+    }
+
+    async function loadGamecenters() {
+      try {
+        const response = await fetch(`${API_URL}/gamecenters`);
+        const data = await response.json();
+
+        if (data.success) {
+          const gamecentersList = document.getElementById('gamecentersList');
+          gamecentersList.innerHTML = data.data.map(gc => `
+            <div class="gamecenter-card">
+              <h3>${gc.gamecenter_name}</h3>
+              <p class="location">${gc.gamecenter_locate}</p>
+              <p class="distance">${gc.distance_km} km away</p>
+            </div>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('Error loading gamecenters:', error);
+      }
+    }
+
+    async function searchSongs(query) {
+      if (!query) {
+        loadSongs();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/search/songs?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const songsList = document.getElementById('songsList');
+          songsList.innerHTML = data.data.map(song => `
+            <div class="song-card">
+              <img src="${song.song_jacket_url || '/placeholder.jpg'}" alt="${song.song_name}">
+              <h3>${song.song_name}</h3>
+              <p class="artist">${song.artist_name}</p>
+              <div class="song-meta">
+                <span class="difficulty ${song.pattern_difficulty.toLowerCase()}">${song.pattern_difficulty}</span>
+                <span class="level">Lv.${song.pattern_lv}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('Error searching songs:', error);
+      }
+    }
+
+    function renderPagination(pagination) {
+      const container = document.getElementById('songsPagination');
+      let html = '';
+
+      for (let i = 1; i <= pagination.pages; i++) {
+        html += `<button class="page-btn ${i === pagination.page ? 'active' : ''}" onclick="loadSongs(${i})">${i}</button>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function setupEventListeners() {
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
+      });
+
+      document.querySelectorAll('.nav-item').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = e.target.getAttribute('href').substring(1);
+
+          document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+
+          e.target.classList.add('active');
+
+          if (target === 'songs') {
+            document.getElementById('songsSection').classList.add('active');
+            loadSongs();
+          } else if (target === 'dlc') {
+            document.getElementById('dlcSection').classList.add('active');
+            loadSongs();
+          } else if (target === 'gamecenters') {
+            document.getElementById('gamecentersSection').classList.add('active');
+            loadGamecenters();
+          }
+        });
+      });
+
+      let searchTimeout;
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          searchSongs(e.target.value);
+        }, 300);
+      });
+    }
+  </script>
+</body>
+</html>
