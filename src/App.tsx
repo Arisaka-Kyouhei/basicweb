@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import DLCListPage from './pages/DLCListPage';
@@ -6,7 +6,14 @@ import SongListPage from './pages/SongListPage';
 import GameCenterPage from './pages/GameCenterPage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'login' | 'signup' | 'dlc' | 'song' | 'gamecenter'>('login');
+  const [currentPage, setCurrentPage] = useState<'login' | 'signup' | 'dlc' | 'song' | 'gamecenter'>('song');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setCurrentPage('login');
+    }
+  }, []);
 
   const renderPage = () => {
     switch (currentPage) {
