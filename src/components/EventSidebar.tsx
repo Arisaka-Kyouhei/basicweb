@@ -2,10 +2,26 @@ import { useState } from 'react';
 
 interface EventSidebarProps {
   showGameGrid?: boolean;
+  onSortChange?: (sortType: string) => void;
 }
 
-export default function EventSidebar({ showGameGrid = false }: EventSidebarProps) {
+export default function EventSidebar({ showGameGrid = false, onSortChange }: EventSidebarProps) {
   const [activeTab, setActiveTab] = useState<'event' | 'patch'>('event');
+  const [activeSort, setActiveSort] = useState<string>('score');
+
+  const sortOptions = [
+    { id: 'score', label: 'Score' },
+    { id: 'difficulty', label: 'Difficulty' },
+    { id: 'level', label: 'Level' },
+    { id: 'name', label: 'Name' },
+    { id: 'artist', label: 'Artist' },
+    { id: 'recent', label: 'Recent' },
+  ];
+
+  const handleSortClick = (sortId: string) => {
+    setActiveSort(sortId);
+    onSortChange?.(sortId);
+  };
 
   const events = [
     {
@@ -38,17 +54,22 @@ export default function EventSidebar({ showGameGrid = false }: EventSidebarProps
     <div>
       {showGameGrid && (
         <div className="mb-6">
-          <div className="grid grid-cols-5 gap-2 mb-3">
-            {Array.from({ length: 15 }).map((_, i) => (
+          <h3 className="text-white text-sm font-semibold mb-3">SORT</h3>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {sortOptions.map((option) => (
               <button
-                key={i}
-                className="aspect-square bg-[#333333] rounded hover:bg-[#444444] transition-colors"
-              />
+                key={option.id}
+                onClick={() => handleSortClick(option.id)}
+                className={`px-3 py-2 rounded text-xs font-medium transition-colors ${
+                  activeSort === option.id
+                    ? 'bg-[#90EE90] text-[#121212]'
+                    : 'bg-[#333333] text-gray-400 hover:bg-[#444444] hover:text-white'
+                }`}
+              >
+                {option.label}
+              </button>
             ))}
           </div>
-          <button className="text-gray-400 text-sm hover:text-white transition-colors flex items-center">
-            <span>▽ 더 보기</span>
-          </button>
         </div>
       )}
 

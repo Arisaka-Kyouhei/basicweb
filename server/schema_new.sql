@@ -1,0 +1,81 @@
+-- User Table
+CREATE TABLE IF NOT EXISTS user (
+  id VARCHAR(50) PRIMARY KEY,
+  pw VARCHAR(255) NOT NULL,
+  username VARCHAR(50) NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Arcade Table
+CREATE TABLE IF NOT EXISTS arcade (
+  arcade_id INT PRIMARY KEY AUTO_INCREMENT,
+  EVENT_TITLE VARCHAR(255),
+  EVENT_DETAIL TEXT,
+  EVENT_START_DATE DATETIME,
+  EVENT_END_DATE DATETIME,
+  GAMECENTER_NAME VARCHAR(63),
+  GAMECENTER_LOCATE VARCHAR(255),
+  PATCH_TITLE VARCHAR(255),
+  PATCH_DETAIL TEXT,
+  PATCH_RELEASE_DATE DATETIME
+);
+
+-- PC Steam Table
+CREATE TABLE IF NOT EXISTS pc_steam (
+  pc_steam_id INT PRIMARY KEY AUTO_INCREMENT,
+  EVENT_TITLE VARCHAR(255),
+  EVENT_DETAIL TEXT,
+  EVENT_START_DATE DATETIME,
+  EVENT_END_DATE DATETIME,
+  PATCH_TITLE VARCHAR(255),
+  PATCH_DETAIL TEXT,
+  PATCH_RELEASE_DATE DATETIME
+);
+
+-- PC Ranking Table
+CREATE TABLE IF NOT EXISTS pc_ranking (
+  ranking_id INT PRIMARY KEY AUTO_INCREMENT,
+  SONG_NAME VARCHAR(255),
+  ARTIST_NAME VARCHAR(127),
+  PATTERN_DIFFICULTY VARCHAR(16),
+  PATTERN_LV VARCHAR(4),
+  PLAYER_NAME VARCHAR(63),
+  BEST_SCORE BIGINT NOT NULL,
+  CLEAR_TYPE VARCHAR(7)
+);
+
+-- Mobile Ranking Table
+CREATE TABLE IF NOT EXISTS mobile_ranking (
+  ranking_id INT PRIMARY KEY AUTO_INCREMENT,
+  SONG_NAME VARCHAR(255),
+  ARTIST_NAME VARCHAR(127),
+  PATTERN_DIFFICULTY VARCHAR(16),
+  PATTERN_LV VARCHAR(4),
+  PLAYER_NAME VARCHAR(63),
+  BEST_SCORE BIGINT NOT NULL,
+  CLEAR_TYPE VARCHAR(7)
+);
+
+-- Mobile Table
+CREATE TABLE IF NOT EXISTS mobile (
+  mobile_id INT PRIMARY KEY AUTO_INCREMENT,
+  EVENT_TITLE VARCHAR(255),
+  EVENT_DETAIL TEXT,
+  EVENT_START_DATE DATETIME,
+  EVENT_END_DATE DATETIME,
+  PATCH_TITLE VARCHAR(255),
+  PATCH_DETAIL TEXT,
+  PATCH_RELEASE_DATE DATETIME
+);
+
+-- Insert Sample Users (password is 'password123' for both)
+INSERT INTO user (id, pw, username) VALUES
+  ('testuser', '$2a$10$rXJZPkC1Y2h8K0NzKFq3ve8vF4vF0YkGqZ3VxJPKxL.Wp5RmzZqWG', 'Test User'),
+  ('admin', '$2a$10$rXJZPkC1Y2h8K0NzKFq3ve8vF4vF0YkGqZ3VxJPKxL.Wp5RmzZqWG', 'Admin User');
+
+-- Insert Sample Arcade Data
+INSERT INTO arcade (EVENT_TITLE, EVENT_DETAIL, EVENT_START_DATE, EVENT_END_DATE, GAMECENTER_NAME, GAMECENTER_LOCATE) VALUES
+  ('New Year Challenge', 'Celebrate the new year with special challenges', '2024-01-01', '2024-01-31', 'Arcade Paradise', 'Seoul, Gangnam District'),
+  ('Spring Festival', 'Experience spring-themed events', '2024-03-01', '2024-03-31', 'Game Zone Tokyo', 'Seoul, Hongdae Area'),
+  ('Summer Carnival', 'Summer arcade carnival with prizes', '2024-06-01', '2024-08-31', 'Cyber Arcade', 'Seoul, Itaewon District'),
+  ('Halloween Spooktacular', 'Scary themed arcade games', '2024-10-01', '2024-10-31', 'Retro Gaming Hub', 'Seoul, Sinchon Area');
